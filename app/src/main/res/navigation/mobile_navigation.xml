@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_breakingNews">
+
+    <fragment
+        android:id="@+id/navigation_breakingNews"
+        android:name="com.example.news.ui.breakingnews.BreakingNewsFragment"
+        android:label="@string/title_breaking_news"
+        tools:layout="@layout/fragment_breaking_news" >
+        <action
+            android:id="@+id/action_navigation_breakingNews_to_articleFragment3"
+            app:destination="@id/articleFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_favoritesNews"
+        android:name="com.example.news.ui.favorites.FavoritesNewsFragment"
+        android:label="@string/title_favorites_news"
+        tools:layout="@layout/fragment_favorites_news" >
+        <action
+            android:id="@+id/action_navigation_favoritesNews_to_articleFragment3"
+            app:destination="@id/articleFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_searchNews"
+        android:name="com.example.news.ui.search.SearchNewsFragment"
+        android:label="@string/title_search_news"
+        tools:layout="@layout/fragment_search_news" >
+        <action
+            android:id="@+id/action_searchFragment_to_articleFragment3"
+            app:destination="@id/articleFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/articleFragment"
+        android:name="com.example.news.ui.article.ArticleFragment"
+        android:label="@string/title_article"
+        tools:layout="@layout/fragment_article"
+        >
+        <argument
+            android:name="article"
+            app:argType="com.example.news.models.Article" />
+    </fragment>
+</navigation>

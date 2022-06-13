@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">News</string>
+    <string name="title_breaking_news">Breaking News</string>
+    <string name="title_favorites_news">Favorites News</string>
+    <string name="title_search_news">Search News</string>
+    <string name="title_article">Article</string>
+
+    <string name="published_at">PUBLISHED AT</string>
+    <string name="description">DESCRIPTION</string>
+    <string name="title">TITLE</string>
+    <string name="source">SOURCE</string>
+
+</resources>
