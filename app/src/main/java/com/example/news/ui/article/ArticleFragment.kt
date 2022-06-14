@@ -9,8 +9,10 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.navigation.fragment.navArgs
 import com.example.news.R
+import com.example.news.models.Article
 import com.example.news.ui.MainActivity
 import com.example.news.ui.NewsViewModel
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 
 
@@ -27,23 +29,23 @@ class ArticleFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as MainActivity).viewModel
-//        val article = args.articllllle
-//        val webView = view.findViewById<WebView>(R.id.webView)
-//        webView.apply {
-//            webViewClient = WebViewClient()
-//            loadUrl(article.urrrrll)
-//        }
-//
-//        saveArticle()
+        val article = arguments?.getSerializable("article") as Article
+        val webView = view.findViewById<WebView>(R.id.webView)
+        webView.apply {
+            webViewClient = WebViewClient()
+            loadUrl(article.url?: "")
+        }
+
+        saveArticle(article, view)
     }
 
-//    fun saveArticle(){
-//        val saveArticle = view?.findViewById<WebView>(R.id.fab)
-//        saveArticle?.setOnClickListener{
-//            viewModel.saveArticle(article)
-//            Snackbar.make(view, "Artical Saved Successfly", Snackbar.LENGTH_LONG).show()
-//        }
-//    }
+    fun saveArticle(article: Article, view: View){
+        val saveArticle = view.findViewById<FloatingActionButton>(R.id.fab)
+        saveArticle?.setOnClickListener{
+            viewModel.saveArticle(article)
+            Snackbar.make(view, "Artical Saved Successfly", Snackbar.LENGTH_LONG).show()
+        }
+    }
 
 
 

@@ -8,7 +8,7 @@ class MyTypeConverter {
 
     @TypeConverter
     fun fromDataToString(source: Source): String {
-        return source.name
+        return source.name?:""
     }
 
     @TypeConverter
