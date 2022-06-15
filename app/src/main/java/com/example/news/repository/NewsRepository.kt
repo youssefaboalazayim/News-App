@@ -4,6 +4,7 @@ import com.example.news.api.ArticleRemoteDataSource
 import com.example.news.database.ArticleDataBase
 import com.example.news.models.Article
 import com.example.news.models.NewsResponse
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
 class NewsRepository(
@@ -13,11 +14,11 @@ class NewsRepository(
 
     private val articleRemoteDataSource: ArticleRemoteDataSource = ArticleRemoteDataSource()
 
-    suspend fun getBreakingNews(countryCode: String, pageNumber: Int): Response<NewsResponse>{
+     fun getBreakingNews(countryCode: String, pageNumber: Int): Flow<NewsResponse> {
         return articleRemoteDataSource.getBreakingNews(countryCode, pageNumber)
     }
 
-    suspend fun searchNews(searchQuery: String, pageNumber: Int): Response<NewsResponse>{
+     fun searchNews(searchQuery: String, pageNumber: Int): Flow<NewsResponse>{
         return articleRemoteDataSource.searchNews(searchQuery, pageNumber)
     }
 

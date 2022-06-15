@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,16 +30,15 @@ import kotlinx.android.synthetic.main.fragment_search_news.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class SearchNewsFragment : Fragment() {
 
-//    private var _binding: FragmentNotificationsBinding? = null
-//    private val binding get() = _binding!!
 
     lateinit var viewModel: NewsViewModel
     lateinit var newsAdapter: NewsAdapter
-    val TAG = "SearchNewsFragment"
+
 
     var isLoading = false
     var isLastPage = false
@@ -46,8 +46,12 @@ class SearchNewsFragment : Fragment() {
     var paginationListener: PaginationListener = object : PaginationListener(){
         override fun loadMore() {
             if(!isLoading && !isLastPage) {
-                viewModel.getSearchNews(etSearch.text.toString())
+
+                if (etSearch.text.toString().removePrefix(" ").isNotEmpty()){
+                    viewModel.getSearchNews(etSearch.text.toString())
+                }
             }
+
         }
         override fun cantLoadMore() {
             rvSearchNews.setPadding(0, 0, 0, 0)
@@ -61,8 +65,8 @@ class SearchNewsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViewModel()
         initRecyclerview()
+        initViewModel()
         initEditText()
         click()
 
@@ -87,8 +91,9 @@ class SearchNewsFragment : Fragment() {
             job = MainScope().launch {
                 delay(SEARCH_NEWS_TIME_DELAY)
                 it.let {
-                    if (it.toString().isNotEmpty()){
-                        viewModel.getSearchNews(it.toString())
+                    val searchKey = it.toString().filter { it != ' ' }
+                    if (searchKey.isNotEmpty()){
+                        viewModel.getSearchNews(searchKey)
                     }
                 }
             }
@@ -108,28 +113,31 @@ class SearchNewsFragment : Fragment() {
     }
 
 
-    private fun initViewModel() {
+    private  fun initViewModel() {
         viewModel = (activity as MainActivity).viewModel
-        viewModel.searchNewsLiveData.observe(viewLifecycleOwner, Observer { response->
-            when(response){
-                is Resource.Success ->{
-                    hideProgressbar()
-                    response.data?.let {
-                        newsAdapter.differ.submitList(it.articles.toList())
-                        val totalPages = it.totalResults / QUERY_PAGE_SIZE + 2
-                        isLastPage = viewModel.searchNewsPage == totalPages
+        lifecycleScope.launch {
+            viewModel.searchNews.collect {
+                    response->
+                when(response){
+                    is Resource.Success ->{
+                        hideProgressbar()
+                        response.data?.let {
+                            newsAdapter.differ.submitList(it.articles.toList())
+                            val totalPages = it.totalResults / QUERY_PAGE_SIZE + 2
+                            isLastPage = viewModel.newsPage == totalPages
+                        }
                     }
-
-                }
-                is Resource.Error-> {
-                    showProgressbar()
-                    response.message?.let {
-                        Toast.makeText(activity, "An error occured: $it", Toast.LENGTH_LONG).show()
+                    is Resource.Error-> {
+                        showProgressbar()
+                        response.message?.let {
+                            Toast.makeText(activity, String.format(requireContext().getString(R.string.An_error_occured), it), Toast.LENGTH_LONG).show()
+                        }
                     }
+                    is Resource.Loading->{showProgressbar()}
                 }
-                is Resource.Loading->{showProgressbar()}
             }
-        })
+        }
+
     }
 
     private fun hideProgressbar(){

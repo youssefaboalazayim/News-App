@@ -10,4 +10,13 @@
     <string name="title">TITLE</string>
     <string name="source">SOURCE</string>
 
+    <string name="Article_Saved_uccessfly">Article Saved Successfly</string>
+    <string name="An_error_occured">An error occurred: %1$s</string>
+    <string name="Successfully_deleted_article">Successfully deleted article</string>
+    <string name="No_Internet_Connection">No Internet Connection</string>
+    <string name="Network_Failure">Network Failure</string>
+    <string name="Conversion_Error">Conversion Error</string>
+
+
+
 </resources>

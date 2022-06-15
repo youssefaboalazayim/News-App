@@ -1,13 +1,9 @@
 package com.example.news.ui
 
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.news.R
 import com.example.news.database.ArticleDataBase
@@ -16,8 +12,6 @@ import com.example.newsapp.NewsViewModelProviderFactory
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-
-    //private lateinit var binding: ActivityMainBinding
 
     lateinit var viewModel: NewsViewModel
 

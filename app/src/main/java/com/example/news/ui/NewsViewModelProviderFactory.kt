@@ -7,7 +7,7 @@ import com.example.news.repository.NewsRepository
 import com.example.news.ui.NewsViewModel
 
 class NewsViewModelProviderFactory (
-    val newsRepository: NewsRepository,
+    private val newsRepository: NewsRepository,
     val app: Application
         ): ViewModelProvider.Factory {
 

@@ -1,17 +1,13 @@
 package com.example.news.ui.breakingnews
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AbsListView
 import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,16 +19,15 @@ import com.example.news.ui.NewsViewModel
 import com.example.news.util.PaginationListener
 import com.example.news.util.Resource
 import kotlinx.android.synthetic.main.fragment_breaking_news.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 class BreakingNewsFragment : Fragment() {
 
-//    private var _binding: FragmentHomeBinding? = null
-//    private val binding get() = _binding!!
 
     lateinit var viewModel: NewsViewModel
     lateinit var newsAdapter: NewsAdapter
-    val TAG = "BreakingNewsFragment"
     var isLoading = false
     var isLastPage = false
     var paginationListener: PaginationListener = object : PaginationListener(){
@@ -57,6 +52,7 @@ class BreakingNewsFragment : Fragment() {
         initViewModel()
         initRecyclerview()
         click()
+        viewModel.getBreakingNews("us")
     }
 
     private fun initRecyclerview(){
@@ -69,28 +65,31 @@ class BreakingNewsFragment : Fragment() {
         }
     }
 
-    private fun initViewModel() {
+    private  fun initViewModel() {
         viewModel = (activity as MainActivity).viewModel
-        viewModel.breakingNewsLiveData.observe(viewLifecycleOwner, Observer {response->
-            when(response){
-                is Resource.Success ->{
-                    hideProgressbar()
-                    response.data?.let {
-                        newsAdapter.differ.submitList(it.articles.toList())
-                        val totalPages = it.totalResults / QUERY_PAGE_SIZE + 2
-                        isLastPage = viewModel.newsPage == totalPages
+        lifecycleScope.launch {
+                viewModel.breakingNews.collect {
+                        response->
+                    when(response){
+                        is Resource.Success ->{
+                            hideProgressbar()
+                            response.data?.let {
+                                newsAdapter.differ.submitList(it.articles.toList())
+                                val totalPages = it.totalResults / QUERY_PAGE_SIZE + 2
+                                isLastPage = viewModel.newsPage == totalPages
+                            }
+                        }
+                        is Resource.Error-> {
+                            showProgressbar()
+                            response.message?.let {
+                                Toast.makeText(activity, String.format(requireContext().getString(R.string.An_error_occured), it) , Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        is Resource.Loading->{showProgressbar()}
                     }
+                }
+        }
 
-                }
-                is Resource.Error-> {
-                    showProgressbar()
-                    response.message?.let {
-                        Toast.makeText(activity, "An error occured: $it", Toast.LENGTH_LONG).show()
-                    }
-                }
-                is Resource.Loading->{showProgressbar()}
-            }
-        })
     }
 
     private fun click(){

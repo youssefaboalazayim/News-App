@@ -10,10 +10,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.news.NewsApplication
+import com.example.news.R
 import com.example.news.models.Article
 import com.example.news.models.NewsResponse
 import com.example.news.repository.NewsRepository
+import com.example.news.util.MyApplicationContext
 import com.example.news.util.Resource
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
@@ -23,17 +26,15 @@ class NewsViewModel(
     val app: Application
 ) :  AndroidViewModel(app) {
 
-    val breakingNewsLiveData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    val breakingNews by lazy { MutableStateFlow<Resource<NewsResponse>>(Resource.Loading()) }
+    val searchNews by lazy { MutableStateFlow<Resource<NewsResponse>>(Resource.Loading()) }
+
     var newsPage = 1
     var breakingNewsResponse: NewsResponse? = null
 
-    val searchNewsLiveData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
     var searchNewsResponse: NewsResponse? = null
 
-    init {
-        getBreakingNews("us")
-    }
     // Breaking News
      fun getBreakingNews(countryCode: String) =
         viewModelScope.launch {
@@ -42,48 +43,43 @@ class NewsViewModel(
         }
 
 
-    private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse>{
-        if (response.isSuccessful){
-            response.body()?.let {
-                newsPage++
-                if(breakingNewsResponse==null){
-                    breakingNewsResponse = it
-                }
-                else{
-                    val oldArticles = breakingNewsResponse?.articles
-                    val newArticles = it.articles
-                    oldArticles?.addAll(newArticles)
-                }
-                return Resource.Success(breakingNewsResponse ?: it)
-            }
+    private suspend fun handleBreakingNewsResponse(response: Flow<NewsResponse>){
+        response.catch { breakingNews.value =   Resource.Error(it.message?: "")}
+            .collect {
+                    newsPage++
+                    if(breakingNewsResponse==null){
+                        breakingNewsResponse = it
+                    }
+                    else{
+                        val oldArticles = breakingNewsResponse?.articles
+                        val newArticles = it.articles
+                        oldArticles?.addAll(newArticles)
+                    }
+                breakingNews.value = Resource.Success(breakingNewsResponse ?: it)
         }
-        return Resource.Error(response.message())
     }
 
     // Search News
-
-
 
     fun getSearchNews(searchQuery: String) =
         viewModelScope.launch {
             safeSearchCall(searchQuery)
         }
 
-    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse>{
-        if(response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                searchNewsPage++
-                if(searchNewsResponse == null) {
-                    searchNewsResponse = resultResponse
-                } else {
+    private suspend fun handleSearchNewsResponse(response: Flow<NewsResponse>){
+        response.catch { searchNews.value =  Resource.Error(it.message?: "")}
+            .collect {
+                newsPage++
+                if(searchNewsResponse==null){
+                    searchNewsResponse = it
+                }
+                else{
                     val oldArticles = searchNewsResponse?.articles
-                    val newArticles = resultResponse.articles
+                    val newArticles = it.articles
                     oldArticles?.addAll(newArticles)
                 }
-                return Resource.Success(searchNewsResponse ?: resultResponse)
+                searchNews.value = Resource.Success(searchNewsResponse ?: it)
             }
-        }
-        return Resource.Error(response.message())
     }
 
     fun saveArticle(article: Article){
@@ -101,41 +97,41 @@ class NewsViewModel(
     }
 
     private suspend fun safeBreakingNewsCall(countryCode: String){
-        breakingNewsLiveData.postValue(Resource.Loading())
+        breakingNews.value = (Resource.Loading())
        try {
            if (hasInternetConnection()){
                val response  = newsRepository.getBreakingNews(countryCode, newsPage)
-               breakingNewsLiveData.postValue(handleBreakingNewsResponse(response))
+               handleBreakingNewsResponse(response)
            }
            else{
-               breakingNewsLiveData.postValue(Resource.Error("No Internet Connection"))
+               breakingNews.value = Resource.Error(NewsApplication.appContext.getString(R.string.No_Internet_Connection))
            }
 
        }
        catch (t: Throwable){
            when(t){
-               is IOException -> breakingNewsLiveData.postValue(Resource.Error("Network Failure"))
-               else -> breakingNewsLiveData.postValue(Resource.Error("Conversion Error"))
+               is IOException -> breakingNews.value = Resource.Error(NewsApplication.appContext.getString(R.string.Network_Failure))
+               else -> breakingNews.value = Resource.Error(NewsApplication.appContext.getString(R.string.Conversion_Error))
            }
        }
     }
 
     private suspend fun safeSearchCall(searchQuery: String){
-        searchNewsLiveData.postValue(Resource.Loading())
+        searchNews.value = (Resource.Loading())
         try {
             if (hasInternetConnection()){
                 val response  = newsRepository.searchNews(searchQuery, searchNewsPage)
-                searchNewsLiveData.postValue(handleSearchNewsResponse(response))
+                (handleSearchNewsResponse(response))
             }
             else{
-                searchNewsLiveData.postValue(Resource.Error("No Internet Connection"))
+                searchNews.value=  Resource.Error(NewsApplication.appContext.getString(R.string.No_Internet_Connection))
             }
 
         }
         catch (t: Throwable){
             when(t){
-                is IOException -> searchNewsLiveData.postValue(Resource.Error("Network Failure"))
-                else -> searchNewsLiveData.postValue(Resource.Error("Conversion Error"))
+                is IOException -> searchNews.value = Resource.Error(NewsApplication.appContext.getString(R.string.Network_Failure))
+                else -> searchNews.value = Resource.Error(NewsApplication.appContext.getString(R.string.Conversion_Error))
             }
         }
     }
@@ -162,9 +158,6 @@ class NewsViewModel(
                 }
             }
         }
-
         return false
     }
-
-
 }

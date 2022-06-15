@@ -30,15 +30,6 @@ abstract class ArticleDataBase: RoomDatabase() {
                 ArticleDataBase::class.java,
                 "articles_database"
             ).build()
-
     }
 }
 
-//    compainion object MyDataBaseInstance{
-//
-//    val myDatabase=
-//        Room.databaseBuilder( MyApplicationContext.appContext,
-//            ArticleDataBase::class.java,
-//            "articles_database"
-//        ).fallbackToDestructiveMigration().build()
-//}

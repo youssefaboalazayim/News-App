@@ -1,17 +1,19 @@
 package com.example.news.api
 
 import com.example.news.models.NewsResponse
-import retrofit2.Response
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 
 class ArticleRemoteDataSource {
-    suspend fun getBreakingNews(countryCode: String, pageNumber: Int): Response<NewsResponse> {
+    fun getBreakingNews(countryCode: String, pageNumber: Int): Flow<NewsResponse> {
         val instance = RetrofitInstance.retrofit.create(ArticlesEndpoint::class.java)
-        return instance.getBreakingNews(countryCode, pageNumber)
+        return flow { emit(instance.getBreakingNews(countryCode, pageNumber))  }
     }
 
-    suspend fun searchNews(searchQuery: String, pageNumber: Int): Response<NewsResponse> {
+     fun searchNews(searchQuery: String, pageNumber: Int): Flow<NewsResponse> {
         val instance = RetrofitInstance.retrofit.create(ArticlesEndpoint::class.java)
-        return instance.newsSearch(searchQuery, pageNumber)
+        return flow { emit(instance.newsSearch(searchQuery, pageNumber))  }
+
     }
 }

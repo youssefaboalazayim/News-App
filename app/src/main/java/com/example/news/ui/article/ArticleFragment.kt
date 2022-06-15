@@ -12,6 +12,7 @@ import com.example.news.R
 import com.example.news.models.Article
 import com.example.news.ui.MainActivity
 import com.example.news.ui.NewsViewModel
+import com.example.news.util.MyApplicationContext
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 
@@ -19,7 +20,6 @@ import com.google.android.material.snackbar.Snackbar
 class ArticleFragment : Fragment() {
 
     lateinit var viewModel: NewsViewModel
-    //val args: ArticleFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,7 +43,7 @@ class ArticleFragment : Fragment() {
         val saveArticle = view.findViewById<FloatingActionButton>(R.id.fab)
         saveArticle?.setOnClickListener{
             viewModel.saveArticle(article)
-            Snackbar.make(view, "Artical Saved Successfly", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(view, requireContext().getString(R.string.Article_Saved_uccessfly), Snackbar.LENGTH_LONG).show()
         }
     }
 
